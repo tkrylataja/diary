@@ -63,6 +63,66 @@
   stroke-width: 2;
 }
 
+/* Перераховані з інших одиниць: порожні всередині, обведені кольором статусу. */
+.pointNormal.hollow {
+  fill: var(--color-surface);
+  stroke: var(--color-lavender-ink);
+}
+
+.pointHigh.hollow {
+  fill: var(--color-surface);
+  stroke: var(--color-high);
+}
+
+.pointLow.hollow {
+  fill: var(--color-surface);
+  stroke: var(--color-low);
+}
+
+.valueLabel {
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--color-text);
+  paint-order: stroke;
+  stroke: var(--color-surface);
+  stroke-width: 3px;
+}
+
+.valueLabelOut {
+  fill: var(--color-high);
+}
+
+.axisTick {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.tooltip rect {
+  fill: var(--color-text);
+}
+
+.tooltip text {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #ffffff;
+}
+
+.tooltip .tipTitle {
+  font-weight: 800;
+}
+
+.hint {
+  margin-top: var(--space-2);
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-tiny);
+  color: var(--color-text-muted);
+}
+
 .legend {
   display: flex;
   flex-wrap: wrap;

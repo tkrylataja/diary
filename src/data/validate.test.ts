@@ -74,3 +74,22 @@ describe('резервна копія JSON', () => {
     expect(parseDb(JSON.parse(backup))).toEqual(db);
   });
 });
+
+describe('коефіцієнти одиниць', () => {
+  const withConv = (conversions: unknown) => ({
+    ...valid,
+    analytes: [{ ...valid.analytes[0], defaultUnit: 'ng/mL', conversions }],
+  });
+
+  it('приймає коректні коефіцієнти', () => {
+    const db = parseDb(withConv([{ unit: 'mIU/L', factor: 21.2 }]));
+    expect(db.analytes[0]?.conversions).toEqual([{ unit: 'mIU/L', factor: 21.2 }]);
+  });
+
+  it.each([[{ unit: '', factor: 2 }], [{ unit: 'x', factor: 0 }], [{ unit: 'x', factor: '2' }]])(
+    'відкидає некоректний коефіцієнт %o',
+    (c) => {
+      expect(() => parseDb(withConv([c]))).toThrow(DbFormatError);
+    },
+  );
+});

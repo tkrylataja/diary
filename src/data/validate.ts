@@ -62,6 +62,21 @@ function parseAnalyte(v: unknown, i: number): Analyte {
   const defaultUnit = optString(v, 'defaultUnit', where);
   if (group !== undefined) analyte.group = group;
   if (defaultUnit !== undefined) analyte.defaultUnit = defaultUnit;
+  if (v.conversions !== undefined) {
+    if (!Array.isArray(v.conversions)) {
+      throw new DbFormatError(`${where}.conversions має бути списком`);
+    }
+    analyte.conversions = v.conversions.map((c, j) => {
+      const at = `${where}.conversions[${j}]`;
+      if (!isObj(c) || typeof c.unit !== 'string' || !c.unit.trim()) {
+        throw new DbFormatError(`${at}.unit порожній`);
+      }
+      if (typeof c.factor !== 'number' || !Number.isFinite(c.factor) || c.factor <= 0) {
+        throw new DbFormatError(`${at}.factor має бути додатним числом`);
+      }
+      return { unit: c.unit, factor: c.factor };
+    });
+  }
   return analyte;
 }
 

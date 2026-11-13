@@ -149,3 +149,35 @@
     box-shadow: inset 3px 0 0 #000 !important;
   }
 }
+
+.norm {
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--color-lavender);
+}
+
+.normMain {
+  font-weight: 700;
+}
+
+.normSub {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.original {
+  font-size: var(--font-size-tiny);
+  color: var(--color-text-muted);
+}
+
+.unitsWarning a {
+  color: var(--color-high);
+  font-weight: 700;
+}
+
+/* Перемикач одиниць: стільки колонок, скільки одиниць. */
+.units {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+}

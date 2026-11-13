@@ -29,7 +29,11 @@ export type Analyte = {
   synonyms: string[];
   group?: string;
   defaultUnit?: string;
+  /** Інші одиниці: 1 defaultUnit = factor unit (напр. 1 ng/mL = 21,2 mIU/L). */
+  conversions?: UnitConversion[];
 };
+
+export type UnitConversion = { unit: string; factor: number };
 
 export function emptyDb(): Db {
   return { version: 1, panels: [], analytes: [] };

@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { bandSpans, dateToTime, timeDomain, timeTicks, yTicks } from './chartMath';
+import {
+  bandSpans,
+  dateToTime,
+  labelPlacements,
+  monthTicks,
+  timeDomain,
+  timeTicks,
+  yTicks,
+} from './chartMath';
 
 describe('yTicks', () => {
   it('починається з нуля й покриває максимум', () => {
@@ -59,5 +67,48 @@ describe('bandSpans', () => {
 
   it('одна точка — смуга навколо неї', () => {
     expect(bandSpans([50], 0, 100, 14)).toEqual([{ x0: 36, x1: 64 }]);
+  });
+});
+
+describe('monthTicks', () => {
+  const domain: [number, number] = [dateToTime('2024-01-15'), dateToTime('2024-07-20')];
+
+  it('щомісяця, коли місця досить', () => {
+    expect(monthTicks(domain, 600)).toEqual([
+      '2024-02-01',
+      '2024-03-01',
+      '2024-04-01',
+      '2024-05-01',
+      '2024-06-01',
+      '2024-07-01',
+    ]);
+  });
+
+  it('рідше на вузькому графіку', () => {
+    const long: [number, number] = [dateToTime('2021-05-01'), dateToTime('2026-11-30')];
+    const ticks = monthTicks(long, 300);
+    expect(ticks.every((t) => ['01', '04', '07', '10'].includes(t.slice(5, 7)))).toBe(true);
+    expect(ticks.length).toBeLessThan(30);
+  });
+});
+
+describe('labelPlacements', () => {
+  it('підписи над точками, а при накладанні — під точкою', () => {
+    expect(
+      labelPlacements([
+        { x: 50, y: 100, width: 30 },
+        { x: 150, y: 100, width: 30 },
+        { x: 160, y: 104, width: 30 },
+      ]),
+    ).toEqual(['above', 'above', 'below']);
+  });
+
+  it('близькі по горизонталі, але різні по висоті — обидва над точками', () => {
+    expect(
+      labelPlacements([
+        { x: 100, y: 50, width: 30 },
+        { x: 105, y: 150, width: 30 },
+      ]),
+    ).toEqual(['above', 'above']);
   });
 });

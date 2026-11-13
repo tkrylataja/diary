@@ -1,4 +1,4 @@
-import { Combine, SearchX, Trash2, X } from 'lucide-react';
+import { Combine, Plus, SearchX, Trash2, X } from 'lucide-react';
 import { useId, useMemo, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { AnalytePicker } from '../components/AnalytePicker';
@@ -17,6 +17,8 @@ import {
   usageCount,
 } from '../data/mutations';
 import type { Analyte } from '../data/types';
+import { parseConversions, type ConversionRow } from '../data/units';
+import { formatNumber } from '../lib/format';
 import { RECORD_FORMS, countLabel } from '../lib/format';
 import { useDb } from '../state/dbContext';
 import styles from './AnalyteEditScreen.module.css';
@@ -54,11 +56,23 @@ function AnalyteEditor({ analyte }: { analyte: Analyte }) {
   const [newSynonym, setNewSynonym] = useState('');
   const [group, setGroup] = useState(analyte.group ?? '');
   const [unit, setUnit] = useState(analyte.defaultUnit ?? '');
+  const [conversions, setConversions] = useState<ConversionRow[]>(() =>
+    (analyte.conversions ?? []).map((c) => ({
+      key: crypto.randomUUID(),
+      unit: c.unit,
+      factor: formatNumber(c.factor),
+    })),
+  );
   const [error, setError] = useState<string>();
   const [mergeTarget, setMergeTarget] = useState<Analyte>();
 
   const groups = useMemo(() => knownGroups(db), [db]);
   const used = usageCount(db, analyte.id);
+
+  function setConversion(key: string, patch: Partial<ConversionRow>) {
+    setConversions(conversions.map((c) => (c.key === key ? { ...c, ...patch } : c)));
+    setError(undefined);
+  }
 
   function goBack() {
     if (location.key === 'default') navigate('/data/analytes', { replace: true });
@@ -94,6 +108,12 @@ function AnalyteEditor({ analyte }: { analyte: Analyte }) {
     };
     if (group.trim()) next.group = group.trim();
     if (unit.trim()) next.defaultUnit = unit.trim();
+    const parsed = parseConversions(unit, conversions);
+    if (parsed.error) {
+      setError(parsed.error);
+      return;
+    }
+    if (parsed.conversions.length > 0) next.conversions = parsed.conversions;
 
     const conflict = findNameConflict(db.analytes, next);
     if (conflict) {
@@ -197,12 +217,56 @@ function AnalyteEditor({ analyte }: { analyte: Analyte }) {
         </datalist>
 
         <TextField
-          label="Одиниці за замовчуванням"
+          label="Основні одиниці"
           value={unit}
           onChange={(e) => setUnit(e.target.value)}
-          hint="Підставляються в нові записи, якщо цей показник ще не траплявся."
+          hint="Підставляються в нові записи й від них рахуються інші одиниці в «Динаміці»."
           autoComplete="off"
         />
+
+        <fieldset className={styles.conversions}>
+          <legend className={styles.label}>Інші одиниці</legend>
+          <p className={styles.muted}>
+            Щоб у «Динаміці» показувати всі записи в одних одиницях. Напр., для пролактину 1 ng/mL =
+            21,2 mIU/L (стандарт ВООЗ 84/500). Коефіцієнт залежить від методу: перевірте бланк.
+          </p>
+          {conversions.map((row, i) => (
+            <div key={row.key} className={styles.conversionRow}>
+              <span className={styles.conversionBase}>1 {unit.trim() || '…'} =</span>
+              <TextField
+                label={`Коефіцієнт ${i + 1}`}
+                inputMode="decimal"
+                placeholder="21,2"
+                value={row.factor}
+                onChange={(e) => setConversion(row.key, { factor: e.target.value })}
+                autoComplete="off"
+              />
+              <TextField
+                label={`Одиниця ${i + 1}`}
+                placeholder="mIU/L"
+                value={row.unit}
+                onChange={(e) => setConversion(row.key, { unit: e.target.value })}
+                autoComplete="off"
+              />
+              <button
+                type="button"
+                className={styles.chipRemove}
+                aria-label={`Прибрати одиницю ${row.unit || i + 1}`}
+                onClick={() => setConversions(conversions.filter((c) => c.key !== row.key))}
+              >
+                <X aria-hidden size={18} strokeWidth={2} />
+              </button>
+            </div>
+          ))}
+          <Button
+            variant="secondary"
+            onClick={() =>
+              setConversions([...conversions, { key: crypto.randomUUID(), unit: '', factor: '' }])
+            }
+          >
+            <Plus aria-hidden size={20} strokeWidth={1.8} /> Додати одиницю
+          </Button>
+        </fieldset>
 
         {error && (
           <p className={styles.error} role="alert">

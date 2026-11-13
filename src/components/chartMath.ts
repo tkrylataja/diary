@@ -91,3 +91,51 @@ export function bandSpans(
     return { x0, x1 };
   });
 }
+
+/** Початки місяців у межах осі (для дрібних поділок); крок 1, 3 або 6 місяців, щоб не злипалися. */
+export function monthTicks([t0, t1]: [number, number], plotWidth: number, minGap = 8): string[] {
+  const start = new Date(t0);
+  const end = new Date(t1);
+  const first = start.getUTCFullYear() * 12 + start.getUTCMonth();
+  const last = end.getUTCFullYear() * 12 + end.getUTCMonth();
+  const pxPerMonth = plotWidth / Math.max(1, (t1 - t0) / (30.44 * DAY));
+  const step = [1, 3, 6].find((s) => s * pxPerMonth >= minGap) ?? 12;
+  const ticks: string[] = [];
+  for (let k = first; k <= last; k++) {
+    const y = Math.floor(k / 12);
+    const m = k % 12;
+    if (m % step !== 0 || Date.UTC(y, m, 1) < t0) continue;
+    ticks.push(`${y}-${String(m + 1).padStart(2, '0')}-01`);
+  }
+  return ticks;
+}
+
+/**
+ * Де ставити підпис значення: над точкою, а якщо він налазить на підпис сусідньої
+ * точки (по горизонталі близько й по висоті поруч) — під точкою.
+ */
+export function labelPlacements(
+  points: { x: number; y: number; width: number }[],
+  lineHeight = 16,
+): ('above' | 'below')[] {
+  const placed: { left: number; right: number; y: number }[] = [];
+  return points.map((p) => {
+    const box = (dy: number) => ({
+      left: p.x - p.width / 2,
+      right: p.x + p.width / 2,
+      y: p.y + dy,
+    });
+    const clashes = (b: { left: number; right: number; y: number }) =>
+      placed.some(
+        (q) => b.left < q.right + 2 && q.left < b.right + 2 && Math.abs(b.y - q.y) < lineHeight,
+      );
+    const above = box(-12);
+    if (!clashes(above)) {
+      placed.push(above);
+      return 'above';
+    }
+    const below = box(20);
+    placed.push(below);
+    return 'below';
+  });
+}

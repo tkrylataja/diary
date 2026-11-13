@@ -1,6 +1,7 @@
 // Чисті функції зміни бази. Кожна повертає нову Db, стару не змінює.
 import { analyteKey, analyteNames } from './analytes';
 import type { Analyte, Db, Panel, Result } from './types';
+import { sameUnit } from './units';
 
 export function newId(): string {
   return crypto.randomUUID();
@@ -89,6 +90,14 @@ export function mergeAnalytes(db: Db, sourceId: string, targetId: string): Db {
   };
   if (!merged.group && source.group) merged.group = source.group;
   if (!merged.defaultUnit && source.defaultUnit) merged.defaultUnit = source.defaultUnit;
+  // Коефіцієнти дубля підходять, лише якщо вони рахуються від тих самих основних одиниць.
+  if (
+    !merged.conversions &&
+    source.conversions &&
+    sameUnit(merged.defaultUnit, source.defaultUnit)
+  ) {
+    merged.conversions = source.conversions;
+  }
 
   return {
     ...db,
