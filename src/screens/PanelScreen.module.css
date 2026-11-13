@@ -1,0 +1,102 @@
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.metaRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  overflow-wrap: anywhere;
+}
+
+.metaRow svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--color-lavender-ink);
+}
+
+.metaRow a {
+  color: var(--color-lavender-ink);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.groupTitle {
+  font-size: 18px;
+  font-weight: var(--font-weight-title);
+}
+
+.list {
+  margin: 0;
+  padding: var(--space-2);
+  list-style: none;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.list li + li {
+  border-top: 1px solid var(--color-divider);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 64px;
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.row:hover {
+  background: var(--color-bg);
+}
+
+.row[data-status='high'] {
+  background: var(--color-high-bg);
+}
+
+.row[data-status='low'] {
+  background: var(--color-low-bg);
+}
+
+.name {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.analyte {
+  font-weight: 700;
+}
+
+.ref {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.chevron {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+@media print {
+  /* На чорно-білому папері значення поза нормою виділяє стрілка і риска зліва. */
+  .row[data-status='high'],
+  .row[data-status='low'] {
+    box-shadow: inset 3px 0 0 #000 !important;
+  }
+}

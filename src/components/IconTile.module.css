@@ -1,0 +1,11 @@
+.tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--tile-size);
+  height: var(--tile-size);
+  border-radius: var(--radius-tile);
+  background: var(--color-lavender);
+  color: var(--color-lavender-ink);
+}

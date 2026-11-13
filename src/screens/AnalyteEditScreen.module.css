@@ -1,0 +1,83 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: var(--font-weight-title);
+}
+
+.label {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-label);
+}
+
+.synonyms {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-left: var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-lavender);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+}
+
+.chipRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-lavender-ink);
+}
+
+.chipRemove:hover {
+  background: rgba(91, 79, 214, 0.12);
+}
+
+.addSynonym {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2);
+  align-items: end;
+}
+
+.addSynonym button {
+  width: auto;
+  min-height: var(--control-height);
+}
+
+.error {
+  font-weight: var(--font-weight-label);
+  color: var(--color-high);
+}
+
+.muted {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}

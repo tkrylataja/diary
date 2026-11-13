@@ -1,0 +1,4 @@
+.shell {
+  min-height: 100dvh;
+  padding-bottom: calc(var(--nav-height) + var(--space-8) + env(safe-area-inset-bottom));
+}

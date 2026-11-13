@@ -1,0 +1,15 @@
+node_modules
+dist
+.DS_Store
+*.log
+
+# Ніколи не комітити незашифровані дані (SPEC §10)
+*.plain.json
+backup*.json
+*.csv
+.env.local
+
+# Лише локально: ТЗ, референси дизайну й налаштування редактора
+SPEC.md
+docs/
+.claude/

@@ -1,0 +1,151 @@
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.synonyms {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.periods {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.period {
+  min-height: var(--tap-min);
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.period[aria-pressed='true'] {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.noChart {
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.unitsInfo,
+.unitsWarning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-size: var(--font-size-small);
+}
+
+.unitsInfo {
+  color: var(--color-text-muted);
+}
+
+.unitsInfo svg {
+  flex: none;
+  color: var(--color-lavender-ink);
+}
+
+.unitsWarning {
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--color-high-bg);
+}
+
+.unitsWarning svg {
+  flex: none;
+  color: var(--color-high);
+}
+
+.values {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.valuesTitle {
+  font-size: 18px;
+  font-weight: var(--font-weight-title);
+}
+
+.list {
+  margin: 0;
+  padding: var(--space-2);
+  list-style: none;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.list li + li {
+  border-top: 1px solid var(--color-divider);
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 56px;
+  justify-content: center;
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.row:hover {
+  background: var(--color-bg);
+}
+
+.row[data-status='high'] {
+  background: var(--color-high-bg);
+}
+
+.row[data-status='low'] {
+  background: var(--color-low-bg);
+}
+
+.rowMain {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.date {
+  font-weight: 700;
+}
+
+.rowSub {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 var(--space-3);
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.note {
+  font-style: italic;
+}
+
+@media print {
+  /* На чорно-білому папері значення поза нормою виділяє стрілка і риска зліва. */
+  .row[data-status='high'],
+  .row[data-status='low'] {
+    box-shadow: inset 3px 0 0 #000 !important;
+  }
+}

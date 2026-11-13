@@ -1,0 +1,77 @@
+/* Токени дизайну (SPEC §7). Єдине місце, де задаються кольори, радіуси, тіні й шрифти. */
+:root {
+  /* Поверхні */
+  --color-bg: #f7f7fb;
+  --color-surface: #ffffff;
+
+  /* Текст */
+  --color-text: #0e0e12;
+  --color-text-muted: #5f6375;
+
+  /* Лаванда */
+  --color-lavender: #ece9fb;
+  --color-lavender-ink: #5b4fd6;
+
+  /* Акцент лайм: текст на ньому завжди --color-on-accent */
+  --color-accent: #d6f55b;
+  --color-on-accent: #0e0e12;
+
+  /* Поза нормою */
+  --color-high: #c2410c;
+  --color-high-bg: #fff1e6;
+  --color-low: #1d4ed8;
+  --color-low-bg: #e8eeff;
+
+  /* Поля */
+  /* SPEC: #8D90A3, трохи темніше, щоб і на фоні сторінки було ≥ 3:1. */
+  --color-border: #8a8da0;
+  --color-focus: #5b4fd6;
+  --color-grid: #e6e6ef;
+  --color-divider: #eeeef4;
+  --focus-ring: 0 0 0 2px var(--color-focus);
+
+  /* Радіуси */
+  --radius-card: 22px;
+  --radius-control: 16px;
+  --radius-tile: 16px;
+  --radius-pill: 999px;
+
+  /* Тіні */
+  --shadow-soft: 0 8px 24px rgba(40, 30, 100, 0.08);
+
+  /* Типографіка */
+  --font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-size-body: 16px;
+  --font-size-small: 14px;
+  --font-size-tiny: 13px;
+  --font-size-title: 30px;
+  --font-weight-title: 800;
+  --font-weight-label: 600;
+  --font-weight-medium: 500;
+
+  /* Відступи (сітка 4/8) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --screen-padding: 20px;
+
+  /* Розміри */
+  --control-height: 52px;
+  --button-height: 56px;
+  --tap-min: 44px;
+  --tile-size: 48px;
+  --content-max: 480px;
+  --nav-height: 72px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --screen-padding: 24px;
+    --content-max: 720px;
+  }
+}

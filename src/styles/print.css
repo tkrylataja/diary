@@ -1,0 +1,76 @@
+/* Версія для лікаря (SPEC §8): без навігації й кнопок, чорно-біла, великий шрифт.
+   Графік зберігає форми точок і смугу референсу. */
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 14mm 12mm;
+  }
+
+  /* Ті самі токени, але чорно-білі: усі компоненти перефарбовуються самі. */
+  :root {
+    --color-bg: #ffffff;
+    --color-surface: #ffffff;
+    --color-text: #000000;
+    --color-text-muted: #333333;
+    --color-lavender: #e4e4e4;
+    --color-lavender-ink: #000000;
+    --color-high: #000000;
+    --color-high-bg: #ffffff;
+    --color-low: #000000;
+    --color-low-bg: #ffffff;
+    --color-grid: #cccccc;
+    --color-divider: #cccccc;
+    --shadow-soft: none;
+    --content-max: 100%;
+    --screen-padding: 0;
+  }
+
+  html,
+  body {
+    background: #ffffff;
+    font-size: 12pt;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-shadow: none !important;
+  }
+
+  /* Смуга референсу на графіку має друкуватися навіть з вимкненими «фонами». */
+  svg {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  [data-print='hide'] {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  li,
+  figure,
+  section > h2 {
+    break-inside: avoid;
+  }
+
+  section > h2 {
+    break-after: avoid;
+  }
+}

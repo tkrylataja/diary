@@ -1,0 +1,118 @@
+.year {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.yearTitle {
+  font-size: 20px;
+  font-weight: var(--font-weight-title);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: 'date info badge';
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  min-height: 80px;
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.card:hover {
+  box-shadow: 0 10px 28px rgba(40, 30, 100, 0.12);
+}
+
+.date {
+  grid-area: date;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-tile);
+  background: var(--color-lavender);
+  line-height: 1;
+}
+
+.day {
+  font-size: 24px;
+  font-weight: var(--font-weight-title);
+}
+
+.month {
+  margin-top: 2px;
+  font-size: var(--font-size-tiny);
+  font-weight: 700;
+  color: var(--color-lavender-ink);
+}
+
+.info {
+  grid-area: info;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.lab {
+  display: -webkit-box;
+  overflow: hidden;
+  font-weight: 700;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.count {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.badge {
+  grid-area: badge;
+  flex: none;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-lavender);
+  color: var(--color-text);
+  font-size: var(--font-size-tiny);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badgeWarm {
+  background: var(--color-high-bg);
+  color: var(--color-high);
+}
+
+/* На вузькому телефоні бейдж іде під назву, щоб лабораторія не обрізалася. */
+@media (max-width: 420px) {
+  .card {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'date info'
+      'date badge';
+  }
+
+  .badge {
+    justify-self: start;
+  }
+}
