@@ -232,7 +232,10 @@ function AnalyteTrend({ analyte }: { analyte: Analyte }) {
               analyte.conversions?.map(
                 (c) => ` · 1 ${analyte.defaultUnit} = ${formatNumber(c.factor)} ${c.unit}`,
               )}
-            . Значення з бланка — під кожним записом.
+            . Значення з бланка — під кожним записом.{' '}
+            <Link to={editLink} data-print="hide">
+              Змінити коефіцієнт
+            </Link>
           </span>
         </p>
       ) : (

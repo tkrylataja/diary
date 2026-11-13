@@ -181,3 +181,8 @@
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
 }
+
+.unitsInfo a {
+  color: var(--color-lavender-ink);
+  font-weight: 700;
+}
