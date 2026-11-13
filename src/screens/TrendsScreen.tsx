@@ -21,7 +21,7 @@ import {
 import { resultStatus } from '../data/status';
 import type { Analyte } from '../data/types';
 import { availableUnits, normSummary, sameUnit, showIn } from '../data/units';
-import { formatDateLong, formatNumber, formatRef, formatValue, todayIso } from '../lib/format';
+import { formatDate, formatNumber, formatRef, formatValue, todayIso } from '../lib/format';
 import { useDb } from '../state/dbContext';
 import styles from './TrendsScreen.module.css';
 
@@ -253,7 +253,7 @@ function AnalyteTrend({ analyte }: { analyte: Analyte }) {
             Норма: {norm.latest.ref} {unit}
           </p>
           <p className={styles.normSub}>
-            За останнім аналізом ({formatDateLong(norm.latest.date)}).
+            За останнім аналізом ({formatDate(norm.latest.date)}).
             {norm.others.length > 0 && ` В інших лабораторіях: ${norm.others.join(' · ')}`}
           </p>
         </div>
@@ -275,7 +275,7 @@ function AnalyteTrend({ analyte }: { analyte: Analyte }) {
                   data-status={status}
                 >
                   <span className={styles.rowMain}>
-                    <span className={styles.date}>{formatDateLong(panel.date)}</span>
+                    <span className={styles.date}>{formatDate(panel.date)}</span>
                     <StatusValue
                       value={formatValue(s)}
                       unit={s.unit}

@@ -9,14 +9,7 @@ import { SearchField } from '../components/SearchField';
 import { analyteMap, groupPanelsByYear, panelMatches, sortPanelsDesc } from '../data/selectors';
 import { outOfRangeCount, resultStatus } from '../data/status';
 import type { Panel } from '../data/types';
-import {
-  ANALYTE_FORMS,
-  RECORD_FORMS,
-  countLabel,
-  dayOfMonth,
-  formatDateLong,
-  monthShort,
-} from '../lib/format';
+import { ANALYTE_FORMS, RECORD_FORMS, countLabel, formatDayMonth, formatDate } from '../lib/format';
 import { useDb } from '../state/dbContext';
 import styles from './PanelsScreen.module.css';
 
@@ -104,10 +97,9 @@ function PanelCard({ panel }: { panel: Panel }) {
   const hasNormal = panel.results.some((r) => resultStatus(r) === 'normal');
   return (
     <Link to={`/panel/${encodeURIComponent(panel.id)}`} className={styles.card}>
-      <span className="visually-hidden">{formatDateLong(panel.date)}</span>
+      <span className="visually-hidden">{formatDate(panel.date)}</span>
       <span className={styles.date} aria-hidden>
-        <span className={styles.day}>{dayOfMonth(panel.date)}</span>
-        <span className={styles.month}>{monthShort(panel.date)}</span>
+        <span className={styles.day}>{formatDayMonth(panel.date)}</span>
       </span>
       <span className={styles.info}>
         {panel.lab && <span className={styles.lab}>{panel.lab}</span>}

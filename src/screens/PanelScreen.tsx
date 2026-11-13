@@ -1,6 +1,6 @@
-import { ChevronRight, FileText, FileQuestion, StickyNote } from 'lucide-react';
+import { ChevronRight, FileText, FileQuestion, StickyNote, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import { ButtonLink } from '../components/Button';
 import { EmptyState } from '../components/EmptyState';
 import { Screen } from '../components/Screen';
@@ -8,9 +8,11 @@ import { PrintHeader } from '../components/PrintHeader';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { StatusValue } from '../components/StatusValue';
 import { originalName } from '../data/analytes';
+import { deleteResult } from '../data/mutations';
 import { analyteMap, groupPanelResults } from '../data/selectors';
 import { resultStatus } from '../data/status';
-import { ANALYTE_FORMS, countLabel, formatDateLong, formatRef, formatValue } from '../lib/format';
+import type { Result } from '../data/types';
+import { ANALYTE_FORMS, countLabel, formatDate, formatRef, formatValue } from '../lib/format';
 import { useDb } from '../state/dbContext';
 import styles from './PanelScreen.module.css';
 
@@ -19,7 +21,8 @@ const URL_RE = /^https?:\/\//i;
 /** Пакет за датою — екран для лікаря №1 (SPEC §6.2). */
 export function PanelScreen() {
   const { id } = useParams();
-  const { db } = useDb();
+  const { db, updateDb } = useDb();
+  const navigate = useNavigate();
   const panel = db.panels.find((p) => p.id === id);
   const analytes = useMemo(() => analyteMap(db.analytes), [db.analytes]);
 
@@ -38,6 +41,22 @@ export function PanelScreen() {
   }
 
   const groups = groupPanelResults(panel, analytes);
+
+  function removeResult(result: Result, name: string) {
+    if (!panel) return;
+    const index = panel.results.indexOf(result);
+    const date = formatDate(panel.date);
+    const value = [formatValue(result), result.unit].filter(Boolean).join(' ');
+    const question =
+      panel.results.length === 1
+        ? `«${name}» — останній показник у цьому обстеженні. Видалити все обстеження за ${date}?`
+        : `Видалити «${name}» (${value}) з обстеження за ${date}?`;
+    if (!window.confirm(`${question}\n\nЩоб зміна потрапила на сайт, потім збережіть data.enc.`))
+      return;
+    const { db: next, panelDeleted } = deleteResult(db, panel.id, index);
+    updateDb(() => next);
+    if (panelDeleted) navigate('/', { replace: true });
+  }
   const subtitle = [panel.lab, countLabel(panel.results.length, ANALYTE_FORMS)]
     .filter(Boolean)
     .join(' · ');
@@ -46,7 +65,7 @@ export function PanelScreen() {
     <Screen>
       <PrintHeader />
       <ScreenHeader
-        title={formatDateLong(panel.date)}
+        title={formatDate(panel.date)}
         subtitle={subtitle}
         back
         editTo={`/panel/${encodeURIComponent(panel.id)}/edit`}
@@ -90,7 +109,7 @@ export function PanelScreen() {
               const status = resultStatus(result);
               const ref = formatRef(result);
               return (
-                <li key={`${analyte.id}-${i}`}>
+                <li key={`${analyte.id}-${i}`} className={styles.item}>
                   <Link
                     to={`/trends/${encodeURIComponent(analyte.id)}`}
                     className={styles.row}
@@ -114,6 +133,15 @@ export function PanelScreen() {
                       data-print="hide"
                     />
                   </Link>
+                  <button
+                    type="button"
+                    className={styles.delete}
+                    onClick={() => removeResult(result, analyte.name)}
+                    aria-label={`Видалити «${analyte.name}» з цього обстеження`}
+                    data-print="hide"
+                  >
+                    <Trash2 aria-hidden size={18} strokeWidth={1.8} />
+                  </button>
                 </li>
               );
             })}

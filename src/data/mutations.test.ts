@@ -122,3 +122,36 @@ describe('назви з бланка', () => {
     ]);
   });
 });
+
+describe('видалення одного значення', () => {
+  it('прибирає лише вказаний результат з обстеження', async () => {
+    const { deleteResult } = await import('./mutations');
+    const { db: next, panelDeleted } = deleteResult(db, 'demo-2024-03-04', 0);
+    expect(panelDeleted).toBe(false);
+    const panel = next.panels.find((p) => p.id === 'demo-2024-03-04')!;
+    expect(panel.results).toHaveLength(7);
+    expect(panel.results.some((r) => r.analyteId === 'prolactin')).toBe(false);
+    expect(next.panels).toHaveLength(db.panels.length);
+    // Показник лишається в списку — він є в інших записах.
+    expect(next.analytes.some((a) => a.id === 'prolactin')).toBe(true);
+  });
+
+  it('останній результат — видаляється все обстеження', async () => {
+    const { deleteResult } = await import('./mutations');
+    const single = {
+      ...db,
+      panels: [
+        ...db.panels,
+        { id: 'one', date: '2026-01-01', results: [{ analyteId: 'tsh', value: 2 }] },
+      ],
+    };
+    const { db: next, panelDeleted } = deleteResult(single, 'one', 0);
+    expect(panelDeleted).toBe(true);
+    expect(next.panels.find((p) => p.id === 'one')).toBeUndefined();
+  });
+
+  it('неіснуючий індекс нічого не змінює', async () => {
+    const { deleteResult } = await import('./mutations');
+    expect(deleteResult(db, 'demo-2024-03-04', 99).db).toBe(db);
+  });
+});

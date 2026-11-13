@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Status } from '../data/status';
 import { useElementWidth } from '../hooks/useElementWidth';
-import { formatDateLong, formatMonthYear, formatNumber } from '../lib/format';
+import { formatDate, formatMonthYear, formatNumber } from '../lib/format';
 import {
   bandSpans,
   dateToTime,
@@ -50,7 +50,7 @@ export function TrendChart({ name, unit, points }: Props) {
     points
       .map((p) => {
         const words = STATUS_WORDS[p.status];
-        return `${formatDateLong(p.date)}: ${formatNumber(p.value)}${words ? ` (${words})` : ''}`;
+        return `${formatDate(p.date)}: ${formatNumber(p.value)}${words ? ` (${words})` : ''}`;
       })
       .join('; ');
 
@@ -281,7 +281,7 @@ function Tooltip({
   width: number;
 }) {
   const lines = [
-    formatDateLong(point.date),
+    formatDate(point.date),
     `${formatNumber(point.value)}${unit ? ` ${unit}` : ''}`,
     ...(point.original ? [`у бланку: ${point.original}`] : []),
     ...(point.nameOriginal ? [`як в аналізі: ${point.nameOriginal}`] : []),

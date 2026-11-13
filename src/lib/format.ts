@@ -1,25 +1,15 @@
-const MONTHS_GENITIVE = [
-  'січня',
-  'лютого',
-  'березня',
-  'квітня',
-  'травня',
-  'червня',
-  'липня',
-  'серпня',
-  'вересня',
-  'жовтня',
-  'листопада',
-  'грудня',
-];
+const pad2 = (n: number) => String(n).padStart(2, '0');
 
-/** «4 березня 2024». Рядок YYYY-MM-DD читається як календарна дата, без часових поясів. */
-export function formatDateLong(date: Date | string): string {
+/**
+ * «22.01.2026» — числовий формат день.місяць.рік, зрозумілий лікарям в Україні й Європі.
+ * Рядок YYYY-MM-DD читається як календарна дата, без часових поясів.
+ */
+export function formatDate(date: Date | string): string {
   if (typeof date === 'string') {
     const [y, m, d] = date.split('-').map(Number);
-    return `${d} ${MONTHS_GENITIVE[(m ?? 1) - 1]} ${y}`;
+    return `${pad2(d ?? 1)}.${pad2(m ?? 1)}.${y}`;
   }
-  return `${date.getDate()} ${MONTHS_GENITIVE[date.getMonth()]} ${date.getFullYear()}`;
+  return `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}.${date.getFullYear()}`;
 }
 
 /** 26.9 → «26,9». Десятковий роздільник — кома (SPEC §5). */
@@ -55,34 +45,14 @@ export function formatValue(r: { value?: number; valueText?: string }): string {
   return r.valueText?.trim() ?? '';
 }
 
-const MONTHS_SHORT = [
-  'січ',
-  'лют',
-  'бер',
-  'квіт',
-  'трав',
-  'черв',
-  'лип',
-  'серп',
-  'вер',
-  'жовт',
-  'лист',
-  'груд',
-];
-
-/** «бер» для 2024-03-04. */
-export function monthShort(date: string): string {
-  return MONTHS_SHORT[Number(date.slice(5, 7)) - 1] ?? '';
+/** «22.01» для плитки дати в списку (рік — у заголовку групи). */
+export function formatDayMonth(date: string): string {
+  return `${date.slice(8, 10)}.${date.slice(5, 7)}`;
 }
 
-/** Число місяця без нуля попереду: 2024-03-04 → «4». */
-export function dayOfMonth(date: string): string {
-  return String(Number(date.slice(8, 10)));
-}
-
-/** «бер 2024» для підписів осі часу. */
+/** «01.2026» для підписів осі часу. */
 export function formatMonthYear(date: string): string {
-  return `${monthShort(date)} ${date.slice(0, 4)}`;
+  return `${date.slice(5, 7)}.${date.slice(0, 4)}`;
 }
 
 /**
@@ -112,8 +82,8 @@ export function todayIso(now: Date = new Date()): string {
   return `${now.getFullYear()}-${m}-${d}`;
 }
 
-/** «13 листопада 2026, 12:57». */
+/** «13.11.2026, 12:57». */
 export function formatDateTime(d: Date): string {
   const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-  return `${formatDateLong(d)}, ${time}`;
+  return `${formatDate(d)}, ${time}`;
 }

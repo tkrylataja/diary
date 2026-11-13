@@ -8,7 +8,7 @@ import { Screen } from '../components/Screen';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { deletePanel } from '../data/mutations';
 import { draftFromPanel } from '../data/panelDraft';
-import { formatDateLong } from '../lib/format';
+import { formatDate } from '../lib/format';
 import { useDb } from '../state/dbContext';
 
 /** Редагування й видалення запису. */
@@ -39,7 +39,7 @@ export function EditPanelScreen() {
   function remove() {
     if (!panel) return;
     const ok = window.confirm(
-      `Видалити запис за ${formatDateLong(panel.date)}? Після збереження файлу data.enc його не можна буде відновити.`,
+      `Видалити запис за ${formatDate(panel.date)}? Після збереження файлу data.enc його не можна буде відновити.`,
     );
     if (!ok) return;
     updateDb((current) => deletePanel(current, panel.id));
@@ -48,7 +48,7 @@ export function EditPanelScreen() {
 
   return (
     <Screen>
-      <ScreenHeader title="Редагувати запис" subtitle={formatDateLong(panel.date)} back />
+      <ScreenHeader title="Редагувати запис" subtitle={formatDate(panel.date)} back />
       <PanelForm
         initial={initial}
         existing={panel}

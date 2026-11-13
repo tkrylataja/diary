@@ -185,3 +185,19 @@ export function syncOriginalSynonyms(db: Db): Db {
   });
   return changed ? { ...db, analytes } : db;
 }
+
+/**
+ * Прибирає один результат (за індексом) з обстеження. Якщо він був останнім,
+ * видаляється й саме обстеження, бо запис без показників не має сенсу.
+ */
+export function deleteResult(
+  db: Db,
+  panelId: string,
+  index: number,
+): { db: Db; panelDeleted: boolean } {
+  const panel = db.panels.find((p) => p.id === panelId);
+  if (!panel || index < 0 || index >= panel.results.length) return { db, panelDeleted: false };
+  if (panel.results.length === 1) return { db: deletePanel(db, panelId), panelDeleted: true };
+  const results = panel.results.filter((_, i) => i !== index);
+  return { db: upsertPanel(db, { ...panel, results }), panelDeleted: false };
+}

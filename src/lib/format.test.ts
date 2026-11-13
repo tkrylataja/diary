@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { formatDateLong, formatNumber, formatRef, formatValue, parseDecimal } from './format';
+import { formatDate, formatNumber, formatRef, formatValue, parseDecimal } from './format';
 
-describe('formatDateLong', () => {
-  it('форматує рядок YYYY-MM-DD', () => {
-    expect(formatDateLong('2024-03-04')).toBe('4 березня 2024');
-    expect(formatDateLong('2026-10-28')).toBe('28 жовтня 2026');
+describe('formatDate', () => {
+  it('день.місяць.рік з нулями попереду', () => {
+    expect(formatDate('2024-03-04')).toBe('04.03.2024');
+    expect(formatDate('2026-10-28')).toBe('28.10.2026');
   });
 
   it('форматує Date за місцевим часом', () => {
-    expect(formatDateLong(new Date(2021, 0, 12))).toBe('12 січня 2021');
+    expect(formatDate(new Date(2021, 0, 12))).toBe('12.01.2021');
   });
 });
 
@@ -68,9 +68,10 @@ describe('plural', () => {
   });
 
   it('короткі частини дати', async () => {
-    const { dayOfMonth, monthShort, todayIso } = await import('./format');
-    expect(dayOfMonth('2024-03-04')).toBe('4');
-    expect(monthShort('2024-03-04')).toBe('бер');
+    const { formatDateTime, formatDayMonth, formatMonthYear, todayIso } = await import('./format');
+    expect(formatDayMonth('2024-03-04')).toBe('04.03');
+    expect(formatMonthYear('2024-03-04')).toBe('03.2024');
+    expect(formatDateTime(new Date(2026, 10, 13, 9, 5))).toBe('13.11.2026, 09:05');
     expect(todayIso(new Date(2026, 10, 3))).toBe('2026-11-03');
   });
 });

@@ -6,7 +6,7 @@ import { PasswordField } from '../components/PasswordField';
 import { DECRYPT_ERROR_MESSAGE, decrypt, type SessionKey } from '../crypto/crypto';
 import { DbFormatError, parseDb } from '../data/validate';
 import type { Db } from '../data/types';
-import { formatDateLong } from '../lib/format';
+import { formatDate } from '../lib/format';
 
 type Props = {
   fileText: string;
@@ -43,7 +43,7 @@ export function UnlockScreen({ fileText, updatedAt, onUnlocked }: Props) {
       lead="Введіть пароль, щоб розшифрувати дані. Усе відбувається в цьому браузері, пароль нікуди не надсилається."
       footer={
         <>
-          <p>Файл data.enc{updatedAt && ` · оновлено ${formatDateLong(updatedAt)}`}</p>
+          <p>Файл data.enc{updatedAt && ` · оновлено ${formatDate(updatedAt)}`}</p>
           <p>Якщо пароль втрачено, дані відновити неможливо.</p>
         </>
       }

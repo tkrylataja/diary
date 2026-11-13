@@ -11,7 +11,7 @@ import {
   type NameMapping,
   type ParsedTable,
 } from '../data/importTable';
-import { formatDateLong, formatRef, formatValue } from '../lib/format';
+import { formatDate, formatRef, formatValue } from '../lib/format';
 import { useDb } from '../state/dbContext';
 import { Button } from './Button';
 import { FileButton } from './FileButton';
@@ -205,7 +205,7 @@ export function ImportCard() {
                     <tbody>
                       {parsed.rows.slice(0, PREVIEW_ROWS).map((r) => (
                         <tr key={r.line}>
-                          <td>{formatDateLong(r.date)}</td>
+                          <td>{formatDate(r.date)}</td>
                           <td>
                             {r.analyte}
                             {r.analyteOriginal && (

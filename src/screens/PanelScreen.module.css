@@ -100,3 +100,38 @@
     box-shadow: inset 3px 0 0 #000 !important;
   }
 }
+
+/* Відступ між рядками, щоб кольорові фони сусідніх значень поза нормою не злипалися. */
+.list li {
+  padding: 3px 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.item .row {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Видалення — непомітна кнопка збоку, щоб її не натиснули випадково; далі ще підтвердження. */
+.delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.delete:hover {
+  background: var(--color-high-bg);
+  color: var(--color-high);
+}
