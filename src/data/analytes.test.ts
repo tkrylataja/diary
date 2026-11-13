@@ -69,3 +69,13 @@ describe('analyteMatches', () => {
     expect(analyteMatches(prl, 'глюк')).toBe(false);
   });
 });
+
+describe('originalName', () => {
+  it('показує назву з бланка, лише якщо вона відрізняється від основної', async () => {
+    const { originalName } = await import('./analytes');
+    const hgb = analytes.find((a) => a.id === 'hgb');
+    expect(originalName({ nameOriginal: 'HGB' }, hgb)).toBe('HGB');
+    expect(originalName({ nameOriginal: ' гемоглобін ' }, hgb)).toBeUndefined();
+    expect(originalName({}, hgb)).toBeUndefined();
+  });
+});

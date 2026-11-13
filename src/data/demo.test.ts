@@ -48,3 +48,25 @@ describe('демо-дані (SPEC §11)', () => {
     expect(parseDb(data)).toEqual(db);
   });
 });
+
+describe('старі файли', () => {
+  it('data.enc зі схемою версії 1 (без nameOriginal) відкривається без помилок', async () => {
+    const { encrypt } = await import('../crypto/crypto');
+    const oldDb = {
+      version: 1,
+      analytes: [{ id: 'prl', name: 'Пролактин', synonyms: ['PRL'] }],
+      panels: [
+        {
+          id: 'p1',
+          date: '2021-03-12',
+          results: [{ analyteId: 'prl', value: 24.1, unit: 'ng/mL', refLow: 4.79, refHigh: 23.3 }],
+        },
+      ],
+    };
+    const file = JSON.stringify(await encrypt(oldDb, 'старий пароль для тесту'));
+    const { data } = await decrypt(file, 'старий пароль для тесту');
+    const opened = parseDb(data);
+    expect(opened.version).toBe(2);
+    expect(opened.panels[0]?.results[0]).toEqual(oldDb.panels[0]?.results[0]);
+  });
+});

@@ -2,7 +2,6 @@ import { Plus, SearchX } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { ButtonLink } from '../components/Button';
-import { DirtyBanner } from '../components/DirtyBanner';
 import { EmptyState } from '../components/EmptyState';
 import { Screen } from '../components/Screen';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -23,7 +22,7 @@ import styles from './PanelsScreen.module.css';
 
 /** Головна: записи за датами, згруповані по роках (SPEC §6.1). */
 export function PanelsScreen() {
-  const { db, dirty } = useDb();
+  const { db } = useDb();
   const [params, setParams] = useSearchParams();
   const query = params.get('q') ?? '';
 
@@ -49,7 +48,6 @@ export function PanelsScreen() {
             : undefined
         }
       />
-      {dirty && <DirtyBanner />}
 
       {sorted.length === 0 ? (
         <EmptyState

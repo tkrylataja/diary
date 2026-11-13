@@ -1,6 +1,5 @@
 import {
   ChevronRight,
-  CircleAlert,
   CircleCheck,
   FileJson,
   FileUp,
@@ -12,6 +11,7 @@ import {
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { Button } from '../components/Button';
+import { DeleteAllCard } from '../components/DeleteAllCard';
 import { FileButton } from '../components/FileButton';
 import { IconTile } from '../components/IconTile';
 import { ImportCard } from '../components/ImportCard';
@@ -20,40 +20,20 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import type { Db } from '../data/types';
 import { DbFormatError, parseDb } from '../data/validate';
 import { downloadFile } from '../lib/download';
-import { RECORD_FORMS, countLabel, formatDateLong, plural, todayIso } from '../lib/format';
+import { RECORD_FORMS, countLabel, todayIso } from '../lib/format';
 import { useDb } from '../state/dbContext';
 import { useLockWithConfirm } from '../state/useLockWithConfirm';
+import { useSaveEncrypted } from '../state/useSaveEncrypted';
 import styles from './DataScreen.module.css';
-
-function formatDateTime(d: Date): string {
-  const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-  return `${formatDateLong(d)}, ${time}`;
-}
 
 /** Дані: збереження файлу, імпорт, показники, резервна копія, інструкція (SPEC §6.6). */
 export function DataScreen() {
-  const { db, dirty, dirtySince, newRecords, exportEncrypted, updateDb } = useDb();
+  const { db, dirty, updateDb } = useDb();
   const lock = useLockWithConfirm();
-  const [saving, setSaving] = useState(false);
+  const { save, saving, error: saveError } = useSaveEncrypted();
   const [saved, setSaved] = useState(false);
-  const [saveError, setSaveError] = useState<string>();
   const [restoreError, setRestoreError] = useState<string>();
   const [restored, setRestored] = useState<number | null>(null);
-
-  async function saveEncrypted() {
-    setSaving(true);
-    setSaveError(undefined);
-    try {
-      const { text, markSaved } = await exportEncrypted();
-      downloadFile('data.enc', text, 'application/octet-stream');
-      markSaved();
-      setSaved(true);
-    } catch {
-      setSaveError('Не вдалося зашифрувати дані. Спробуйте ще раз.');
-    } finally {
-      setSaving(false);
-    }
-  }
 
   function saveJson() {
     downloadFile(
@@ -91,20 +71,6 @@ export function DataScreen() {
     <Screen>
       <ScreenHeader title="Дані" />
 
-      {dirty && dirtySince && (
-        <div className={styles.dirty} role="status">
-          <CircleAlert aria-hidden size={22} strokeWidth={1.8} />
-          <span>
-            <strong>Є незбережені зміни</strong>
-            <span className={styles.dirtySub}>
-              {newRecords > 0
-                ? `${newRecords} ${plural(newRecords, ['новий запис', 'нові записи', 'нових записів'])} від ${formatDateTime(dirtySince)}`
-                : `Зміни від ${formatDateTime(dirtySince)}`}
-            </span>
-          </span>
-        </div>
-      )}
-
       <section className={styles.card} aria-labelledby="save-title">
         <div className={styles.cardHead}>
           <IconTile icon={ShieldCheck} />
@@ -116,7 +82,11 @@ export function DataScreen() {
           Файл шифрується вашим паролем у цьому браузері. Щоб зміни з’явилися на сайті, замініть ним{' '}
           <code>public/data.enc</code> у репозиторії (інструкція внизу).
         </p>
-        <Button onClick={() => void saveEncrypted()} disabled={saving} aria-busy={saving}>
+        <Button
+          onClick={() => void save().then((ok) => setSaved(ok))}
+          disabled={saving}
+          aria-busy={saving}
+        >
           {saving ? 'Шифрую…' : 'Завантажити data.enc'}
         </Button>
         {saveError && (
@@ -133,6 +103,8 @@ export function DataScreen() {
       </section>
 
       <ImportCard />
+
+      <DeleteAllCard />
 
       <Link to="/data/analytes" className={styles.row}>
         <IconTile icon={Tags} />

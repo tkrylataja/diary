@@ -7,6 +7,7 @@ import { Screen } from '../components/Screen';
 import { PrintHeader } from '../components/PrintHeader';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { StatusValue } from '../components/StatusValue';
+import { originalName } from '../data/analytes';
 import { analyteMap, groupPanelResults } from '../data/selectors';
 import { resultStatus } from '../data/status';
 import { ANALYTE_FORMS, countLabel, formatDateLong, formatRef, formatValue } from '../lib/format';
@@ -97,6 +98,11 @@ export function PanelScreen() {
                   >
                     <span className={styles.name}>
                       <span className={styles.analyte}>{analyte.name}</span>
+                      {originalName(result, analyte) && (
+                        <span className={styles.ref}>
+                          як в аналізі: {originalName(result, analyte)}
+                        </span>
+                      )}
                       {ref && <span className={styles.ref}>реф. {ref}</span>}
                     </span>
                     <StatusValue value={formatValue(result)} unit={result.unit} status={status} />

@@ -89,3 +89,36 @@ describe('підказки для форми', () => {
     expect(knownGroups(db)).toEqual(['Вітаміни й залізо', 'Гормони', 'Кров і біохімія']);
   });
 });
+
+describe('назви з бланка', () => {
+  it('додаються в синоніми показника без повторів і конфліктів', async () => {
+    const { syncOriginalSynonyms } = await import('./mutations');
+    const withOriginals = {
+      ...db,
+      panels: [
+        ...db.panels,
+        {
+          id: 'p-orig',
+          date: '2026-01-01',
+          results: [
+            { analyteId: 'hemoglobin', value: 13, nameOriginal: 'Hemoglobina (HGB)' },
+            { analyteId: 'hemoglobin', value: 13, nameOriginal: 'hgb' },
+            { analyteId: 'ferritin', value: 40, nameOriginal: 'HGB' },
+          ],
+        },
+      ],
+    };
+    const next = syncOriginalSynonyms(withOriginals);
+    expect(next.analytes.find((a) => a.id === 'hemoglobin')?.synonyms).toEqual([
+      'HGB',
+      'Hb',
+      'Hemoglobina',
+      'Hemoglobina (HGB)',
+    ]);
+    // «HGB» уже належить гемоглобіну — феритину не додається.
+    expect(next.analytes.find((a) => a.id === 'ferritin')?.synonyms).toEqual([
+      'Ferritin',
+      'Ferrytyna',
+    ]);
+  });
+});

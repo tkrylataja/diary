@@ -1,5 +1,6 @@
 import { CircleAlert, Copy, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { originalName } from '../data/analytes';
 import { analyteMap } from '../data/selectors';
 import { knownGroups, latestPanel, recentLabs } from '../data/mutations';
 import {
@@ -271,6 +272,7 @@ function RowCard({
   const high = parseDecimal(row.refHigh);
   const ref = formatRef({ refLow: low, refHigh: high, refText: row.refText });
   const firstError = errors && Object.values(errors)[0];
+  const original = originalName(row, analyte ?? { id: '', name, synonyms: [] });
 
   return (
     <div className={styles.rowCard} data-invalid={firstError ? true : undefined}>
@@ -279,6 +281,7 @@ function RowCard({
           {name}
           {value && <> · {value}</>}
         </span>
+        {original && <span className={styles.rowCardSub}>як в аналізі: {original}</span>}
         {ref && <span className={styles.rowCardSub}>реф. {ref}</span>}
         {firstError && <span className={styles.rowCardError}>{firstError}</span>}
         <span className="visually-hidden">, змінити</span>
@@ -338,7 +341,12 @@ function RowEditor({
     const untouched = !row.unit.trim() && !row.refLow.trim() && !row.refHigh.trim();
     if (untouched) {
       const filled = rowForAnalyte(db, a, excludePanelId);
-      onChange({ ...filled, key: row.key, value: row.value });
+      onChange({
+        ...filled,
+        key: row.key,
+        value: row.value,
+        nameOriginal: row.nameOriginal?.trim() ? row.nameOriginal : filled.nameOriginal,
+      });
     } else {
       onChange({ ...row, analyteId: a.id, newName: undefined, newGroup: undefined });
     }
@@ -377,6 +385,14 @@ function RowEditor({
           </datalist>
         </>
       )}
+      <TextField
+        label="Як в аналізі (необов’язково)"
+        placeholder="Напр. MCV, HGB, АТ-ТПО"
+        hint="Назва з бланка. Знадобиться для пошуку й показується поруч з основною."
+        value={row.nameOriginal ?? ''}
+        onChange={(e) => onChange({ ...row, nameOriginal: e.target.value })}
+        autoComplete="off"
+      />
       <div className={styles.pair}>
         <TextField
           label="Значення"

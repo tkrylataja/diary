@@ -1,4 +1,4 @@
-import type { Analyte, Db, Panel, Result } from './types';
+import { SCHEMA_VERSION, type Analyte, type Db, type Panel, type Result } from './types';
 
 /** Розшифровані дані не відповідають моделі SPEC §5. */
 export class DbFormatError extends Error {
@@ -94,6 +94,7 @@ function parseResult(v: unknown, where: string, analyteIds: Set<string>): Result
   const fields = {
     value,
     valueText,
+    nameOriginal: optString(v, 'nameOriginal', where)?.trim() || undefined,
     unit: optString(v, 'unit', where),
     refLow: optNumber(v, 'refLow', where),
     refHigh: optNumber(v, 'refHigh', where),
@@ -142,7 +143,10 @@ function assertUniqueIds(items: { id: string }[], what: string) {
  */
 export function parseDb(input: unknown): Db {
   if (!isObj(input)) throw new DbFormatError("очікувався об'єкт");
-  if (input.version !== 1) throw new DbFormatError('непідтримувана версія');
+  // Версія 1 (до nameOriginal) читається без змін: нове поле просто відсутнє.
+  if (input.version !== 1 && input.version !== SCHEMA_VERSION) {
+    throw new DbFormatError('непідтримувана версія');
+  }
   if (!Array.isArray(input.analytes) || !Array.isArray(input.panels)) {
     throw new DbFormatError('немає списків panels або analytes');
   }
@@ -151,5 +155,5 @@ export function parseDb(input: unknown): Db {
   const ids = new Set(analytes.map((a) => a.id));
   const panels = input.panels.map((p, i) => parsePanel(p, i, ids));
   assertUniqueIds(panels, 'запису');
-  return { version: 1, panels, analytes };
+  return { version: SCHEMA_VERSION, panels, analytes };
 }

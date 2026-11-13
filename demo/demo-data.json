@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "analytes": [
     {
       "id": "prolactin",
@@ -25,7 +25,7 @@
     {
       "id": "vitamin-d",
       "name": "Вітамін D (25-OH)",
-      "synonyms": ["25(OH)D", "Vitamin D", "Witamina D"],
+      "synonyms": ["25(OH)D", "Vitamin D", "Witamina D", "Witamina D 25-OH"],
       "group": "Вітаміни й залізо",
       "defaultUnit": "ng/mL"
     },
@@ -79,8 +79,20 @@
           "refLow": 4.79,
           "refHigh": 23.3
         },
-        { "analyteId": "tsh", "value": 2.1, "unit": "µIU/mL", "refLow": 0.27, "refHigh": 4.2 },
-        { "analyteId": "vitamin-d", "value": 18.4, "unit": "ng/mL", "refLow": 30, "refHigh": 100 }
+        {
+          "analyteId": "tsh",
+          "value": 2.1,
+          "unit": "µIU/mL",
+          "refLow": 0.27,
+          "refHigh": 4.2
+        },
+        {
+          "analyteId": "vitamin-d",
+          "value": 18.4,
+          "unit": "ng/mL",
+          "refLow": 30,
+          "refHigh": 100
+        }
       ]
     },
     {
@@ -95,8 +107,20 @@
           "refLow": 4.79,
           "refHigh": 23.3
         },
-        { "analyteId": "ferritin", "value": 22, "unit": "ng/mL", "refLow": 13, "refHigh": 150 },
-        { "analyteId": "hemoglobin", "value": 12.9, "unit": "g/dL", "refLow": 12, "refHigh": 15.5 }
+        {
+          "analyteId": "ferritin",
+          "value": 22,
+          "unit": "ng/mL",
+          "refLow": 13,
+          "refHigh": 150
+        },
+        {
+          "analyteId": "hemoglobin",
+          "value": 12.9,
+          "unit": "g/dL",
+          "refLow": 12,
+          "refHigh": 15.5
+        }
       ]
     },
     {
@@ -107,13 +131,28 @@
       "results": [
         {
           "analyteId": "prolactin",
-          "value": 22.0,
+          "nameOriginal": "Prolaktyna",
+          "value": 22,
           "unit": "ng/mL",
-          "refLow": 6.0,
+          "refLow": 6,
           "refHigh": 29.9
         },
-        { "analyteId": "tsh", "value": 1.8, "unit": "µIU/mL", "refLow": 0.35, "refHigh": 4.94 },
-        { "analyteId": "vitamin-d", "value": 68, "unit": "nmol/L", "refLow": 75, "refHigh": 250 }
+        {
+          "analyteId": "tsh",
+          "nameOriginal": "TSH",
+          "value": 1.8,
+          "unit": "µIU/mL",
+          "refLow": 0.35,
+          "refHigh": 4.94
+        },
+        {
+          "analyteId": "vitamin-d",
+          "nameOriginal": "Witamina D 25-OH",
+          "value": 68,
+          "unit": "nmol/L",
+          "refLow": 75,
+          "refHigh": 250
+        }
       ]
     },
     {
@@ -123,13 +162,27 @@
       "results": [
         {
           "analyteId": "prolactin",
+          "nameOriginal": "Prolaktyna",
           "value": 18.6,
           "unit": "ng/mL",
-          "refLow": 6.0,
+          "refLow": 6,
           "refHigh": 29.9
         },
-        { "analyteId": "vitamin-d", "value": 32.5, "unit": "ng/mL", "refLow": 30, "refHigh": 100 },
-        { "analyteId": "crp", "valueText": "<0.5", "unit": "mg/L", "refHigh": 5 }
+        {
+          "analyteId": "vitamin-d",
+          "nameOriginal": "Witamina D 25-OH",
+          "value": 32.5,
+          "unit": "ng/mL",
+          "refLow": 30,
+          "refHigh": 100
+        },
+        {
+          "analyteId": "crp",
+          "nameOriginal": "CRP",
+          "valueText": "<0.5",
+          "unit": "mg/L",
+          "refHigh": 5
+        }
       ]
     },
     {
@@ -146,13 +199,59 @@
           "refLow": 4.79,
           "refHigh": 23.3
         },
-        { "analyteId": "tsh", "value": 1.94, "unit": "µIU/mL", "refLow": 0.27, "refHigh": 4.2 },
-        { "analyteId": "ft4", "value": 15.6, "unit": "pmol/L", "refLow": 12, "refHigh": 22 },
-        { "analyteId": "vitamin-d", "value": 41.2, "unit": "ng/mL", "refLow": 30, "refHigh": 100 },
-        { "analyteId": "ferritin", "value": 48, "unit": "ng/mL", "refLow": 13, "refHigh": 150 },
-        { "analyteId": "hemoglobin", "value": 13.4, "unit": "g/dL", "refLow": 12, "refHigh": 15.5 },
-        { "analyteId": "glucose", "value": 4.9, "unit": "mmol/L", "refLow": 4.1, "refHigh": 5.9 },
-        { "analyteId": "creatinine", "value": 71, "unit": "µmol/L", "refLow": 45, "refHigh": 84 }
+        {
+          "analyteId": "tsh",
+          "nameOriginal": "ТТГ (TSH)",
+          "value": 1.94,
+          "unit": "µIU/mL",
+          "refLow": 0.27,
+          "refHigh": 4.2
+        },
+        {
+          "analyteId": "ft4",
+          "nameOriginal": "FT4",
+          "value": 15.6,
+          "unit": "pmol/L",
+          "refLow": 12,
+          "refHigh": 22
+        },
+        {
+          "analyteId": "vitamin-d",
+          "value": 41.2,
+          "unit": "ng/mL",
+          "refLow": 30,
+          "refHigh": 100
+        },
+        {
+          "analyteId": "ferritin",
+          "value": 48,
+          "unit": "ng/mL",
+          "refLow": 13,
+          "refHigh": 150
+        },
+        {
+          "analyteId": "hemoglobin",
+          "nameOriginal": "HGB",
+          "value": 13.4,
+          "unit": "g/dL",
+          "refLow": 12,
+          "refHigh": 15.5
+        },
+        {
+          "analyteId": "glucose",
+          "nameOriginal": "GLU",
+          "value": 4.9,
+          "unit": "mmol/L",
+          "refLow": 4.1,
+          "refHigh": 5.9
+        },
+        {
+          "analyteId": "creatinine",
+          "value": 71,
+          "unit": "µmol/L",
+          "refLow": 45,
+          "refHigh": 84
+        }
       ]
     },
     {
@@ -167,8 +266,20 @@
           "refLow": 4.79,
           "refHigh": 23.3
         },
-        { "analyteId": "tsh", "value": 2.6, "unit": "µIU/mL", "refLow": 0.27, "refHigh": 4.2 },
-        { "analyteId": "vitamin-d", "value": 27.8, "unit": "ng/mL", "refLow": 30, "refHigh": 100 }
+        {
+          "analyteId": "tsh",
+          "value": 2.6,
+          "unit": "µIU/mL",
+          "refLow": 0.27,
+          "refHigh": 4.2
+        },
+        {
+          "analyteId": "vitamin-d",
+          "value": 27.8,
+          "unit": "ng/mL",
+          "refLow": 30,
+          "refHigh": 100
+        }
       ]
     },
     {
@@ -184,8 +295,20 @@
           "refLow": 4.79,
           "refHigh": 23.3
         },
-        { "analyteId": "ft4", "value": 14.9, "unit": "pmol/L", "refLow": 12, "refHigh": 22 },
-        { "analyteId": "ferritin", "value": 11, "unit": "ng/mL", "refLow": 13, "refHigh": 150 }
+        {
+          "analyteId": "ft4",
+          "value": 14.9,
+          "unit": "pmol/L",
+          "refLow": 12,
+          "refHigh": 22
+        },
+        {
+          "analyteId": "ferritin",
+          "value": 11,
+          "unit": "ng/mL",
+          "refLow": 13,
+          "refHigh": 150
+        }
       ]
     }
   ]

@@ -1,8 +1,16 @@
 // Імпорт таблиці з CSV або Excel (SPEC §6.6).
-// Колонки: date, lab, analyte, value, unit, ref_low, ref_high.
-// Рядки з однаковими датою й лабораторією стають одним записом.
+// Колонки: date, lab, analyte, analyte_original, value, unit, ref_low, ref_high
+// (analyte_original — як показник підписаний у бланку; старі файли без неї теж працюють).
+// Рядки з однаковими датою й лабораторією стають одним записом; без лабораторії — за датою.
 import { analyteKey, findAnalyteByName } from './analytes';
-import { cleanSynonyms, newId, upsertAnalyte, upsertPanel } from './mutations';
+import {
+  cleanSynonyms,
+  newId,
+  syncOriginalSynonyms,
+  upsertAnalyte,
+  upsertPanel,
+} from './mutations';
+import { sameUnit } from './units';
 import type { Analyte, Db, Panel, Result } from './types';
 import { isValidDate } from './validate';
 import { parseDecimal } from '../lib/format';
@@ -13,6 +21,7 @@ export const IMPORT_COLUMNS = [
   'date',
   'lab',
   'analyte',
+  'analyte_original',
   'value',
   'unit',
   'ref_low',
@@ -27,6 +36,8 @@ export type ImportRow = {
   date: string;
   lab?: string;
   analyte: string;
+  /** Як показник підписаний у бланку. */
+  analyteOriginal?: string;
   value?: number;
   valueText?: string;
   unit?: string;
@@ -191,8 +202,10 @@ export function parseTable(table: Cell[][]): ParsedTable {
     else row.valueText = valueStr;
     const lab = cellText(get(cells, 'lab'));
     const unit = cellText(get(cells, 'unit'));
+    const analyteOriginal = cellText(get(cells, 'analyte_original'));
     if (lab) row.lab = lab;
     if (unit) row.unit = unit;
+    if (analyteOriginal) row.analyteOriginal = analyteOriginal;
     rows.push(row);
   });
 
@@ -201,15 +214,23 @@ export function parseTable(table: Cell[][]): ParsedTable {
 
 // ---------- зіставлення назв ----------
 
+/** Наявний показник для рядка: за назвою, а якщо ні — за назвою з бланка. */
+function knownAnalyte(analytes: Analyte[], row: ImportRow): Analyte | undefined {
+  return (
+    findAnalyteByName(analytes, row.analyte) ??
+    (row.analyteOriginal ? findAnalyteByName(analytes, row.analyteOriginal) : undefined)
+  );
+}
+
 /** Назви з файлу, яких немає серед показників і синонімів (по одній на ключ). */
 export function unknownAnalyteNames(analytes: Analyte[], rows: ImportRow[]): string[] {
   const seen = new Set<string>();
   const names: string[] = [];
-  for (const { analyte } of rows) {
-    const key = analyteKey(analyte);
+  for (const row of rows) {
+    const key = analyteKey(row.analyte);
     if (seen.has(key)) continue;
     seen.add(key);
-    if (!findAnalyteByName(analytes, analyte)) names.push(analyte);
+    if (!knownAnalyte(analytes, row)) names.push(row.analyte);
   }
   return names;
 }
@@ -223,7 +244,9 @@ export type NameMapping = Record<string, { kind: 'new' } | { kind: 'existing'; a
 export type ImportStats = {
   newPanels: number;
   updatedPanels: number;
+  /** Нових рядків (результатів), що буде додано. */
   results: number;
+  /** Пропущених дублів: та сама дата, показник, значення й одиниця вже є. */
   duplicates: number;
   newAnalytes: number;
 };
@@ -232,13 +255,20 @@ function panelKey(date: string, lab: string | undefined): string {
   return `${date}|${(lab ?? '').trim().toLowerCase()}`;
 }
 
+/** Дубль: той самий показник, значення й одиниця (дату перевіряє виклик). */
 function sameResult(a: Result, b: Result): boolean {
-  return a.analyteId === b.analyteId && a.value === b.value && a.valueText === b.valueText;
+  return (
+    a.analyteId === b.analyteId &&
+    a.value === b.value &&
+    (a.valueText ?? '').trim() === (b.valueText ?? '').trim() &&
+    sameUnit(a.unit, b.unit)
+  );
 }
 
 /**
- * Застосовує імпорт. Рядки йдуть у наявний запис із тими самими датою й
- * лабораторією або в новий; точні повтори (той самий показник і значення) пропускаються.
+ * Застосовує імпорт. Рядки йдуть у наявне обстеження з тими самими датою й
+ * лабораторією (без лабораторії — за датою) або в нове. Дублі — та сама дата,
+ * показник, значення й одиниця в будь-якому обстеженні — пропускаються.
  * mapping ключується за analyteKey(назви).
  */
 export function applyImport(
@@ -260,7 +290,7 @@ export function applyImport(
   for (const row of rows) {
     const key = analyteKey(row.analyte);
     if (idByKey.has(key)) continue;
-    const known = findAnalyteByName(next.analytes, row.analyte);
+    const known = knownAnalyte(next.analytes, row);
     if (known) {
       idByKey.set(key, known.id);
       continue;
@@ -284,20 +314,32 @@ export function applyImport(
     stats.newAnalytes++;
   }
 
-  // 2. Записи: групуємо за датою й лабораторією.
+  // 2. Обстеження: групуємо за датою й лабораторією.
   const panels = new Map<string, Panel>();
-  for (const p of next.panels) panels.set(panelKey(p.date, p.lab), p);
+  const byDate = new Map<string, Result[]>();
+  for (const p of next.panels) {
+    panels.set(panelKey(p.date, p.lab), p);
+    byDate.set(p.date, [...(byDate.get(p.date) ?? []), ...p.results]);
+  }
   const touched = new Map<string, 'new' | 'updated'>();
 
   for (const row of rows) {
     const analyteId = idByKey.get(analyteKey(row.analyte));
     if (!analyteId) continue;
     const result: Result = { analyteId };
+    if (row.analyteOriginal) result.nameOriginal = row.analyteOriginal;
     if (row.value !== undefined) result.value = row.value;
     if (row.valueText !== undefined) result.valueText = row.valueText;
     if (row.unit) result.unit = row.unit;
     if (row.refLow !== undefined) result.refLow = row.refLow;
     if (row.refHigh !== undefined) result.refHigh = row.refHigh;
+
+    const sameDay = byDate.get(row.date) ?? [];
+    if (sameDay.some((r) => sameResult(r, result))) {
+      stats.duplicates++;
+      continue;
+    }
+    byDate.set(row.date, [...sameDay, result]);
 
     const key = panelKey(row.date, row.lab);
     let panel = panels.get(key);
@@ -305,10 +347,6 @@ export function applyImport(
       panel = { id: newId(), date: row.date, results: [] };
       if (row.lab) panel.lab = row.lab;
       touched.set(key, 'new');
-    }
-    if (panel.results.some((r) => sameResult(r, result))) {
-      stats.duplicates++;
-      continue;
     }
     panel = { ...panel, results: [...panel.results, result] };
     panels.set(key, panel);
@@ -323,5 +361,6 @@ export function applyImport(
     if (kind === 'new') stats.newPanels++;
     else stats.updatedPanels++;
   }
-  return { db: next, stats };
+  // Назви з бланків — у синоніми, щоб пошук знаходив і за ними.
+  return { db: syncOriginalSynonyms(next), stats };
 }

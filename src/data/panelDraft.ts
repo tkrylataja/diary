@@ -2,7 +2,13 @@
 // перевірка й перетворення в Panel.
 import { analyteKey, findAnalyteByName } from './analytes';
 import { isValidDate } from './validate';
-import { lastResultFor, newId, upsertAnalyte, upsertPanel } from './mutations';
+import {
+  lastResultFor,
+  newId,
+  syncOriginalSynonyms,
+  upsertAnalyte,
+  upsertPanel,
+} from './mutations';
 import type { Analyte, Db, Panel, Result } from './types';
 import { formatNumber, parseDecimal } from '../lib/format';
 
@@ -13,6 +19,8 @@ export type ResultDraft = {
   /** Назва нового показника, якого ще немає в базі. */
   newName?: string;
   newGroup?: string;
+  /** Як показник підписаний у бланку (необов'язково). */
+  nameOriginal?: string;
   value: string;
   unit: string;
   refLow: string;
@@ -51,6 +59,7 @@ export function rowFromResult(result: Result): ResultDraft {
   return {
     key: newId(),
     analyteId: result.analyteId,
+    nameOriginal: result.nameOriginal,
     value: result.value !== undefined ? num(result.value) : (result.valueText ?? ''),
     unit: result.unit ?? '',
     refLow: num(result.refLow),
@@ -76,6 +85,7 @@ export function rowForAnalyte(db: Db, analyte: Analyte, excludePanelId?: string)
     key: newId(),
     analyteId: analyte.id,
     value: '',
+    nameOriginal: last?.nameOriginal,
     unit: last?.unit ?? analyte.defaultUnit ?? '',
     refLow: num(last?.refLow),
     refHigh: num(last?.refHigh),
@@ -87,6 +97,7 @@ export function isRowBlank(row: ResultDraft): boolean {
   return (
     !row.analyteId &&
     !row.newName?.trim() &&
+    !row.nameOriginal?.trim() &&
     !row.value.trim() &&
     !row.unit.trim() &&
     !row.refLow.trim() &&
@@ -170,6 +181,8 @@ export function applyDraft(
     if (!analyteId) continue;
 
     const result: Result = { analyteId };
+    const nameOriginal = trimmed(row.nameOriginal ?? '');
+    if (nameOriginal) result.nameOriginal = nameOriginal;
     const value = parseDecimal(row.value);
     if (value !== undefined) result.value = value;
     else result.valueText = row.value.trim();
@@ -192,5 +205,5 @@ export function applyDraft(
   if (note) panel.note = note;
   if (existing?.tags) panel.tags = existing.tags;
 
-  return { db: upsertPanel(next, panel), panelId: panel.id };
+  return { db: syncOriginalSynonyms(upsertPanel(next, panel)), panelId: panel.id };
 }

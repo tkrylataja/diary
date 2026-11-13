@@ -74,3 +74,16 @@ export function analyteMatches(a: Analyte, query: string): boolean {
   const q = analyteKey(query);
   return !q || analyteNames(a).some((n) => analyteKey(n).includes(q));
 }
+
+/**
+ * Назва з бланка, якщо вона відрізняється від основної (інакше undefined):
+ * «як в аналізі: MCV» показується лише тоді, коли це щось додає.
+ */
+export function originalName(
+  result: { nameOriginal?: string },
+  analyte: Analyte | undefined,
+): string | undefined {
+  const original = result.nameOriginal?.trim();
+  if (!original || (analyte && analyteKey(original) === analyteKey(analyte.name))) return undefined;
+  return original;
+}

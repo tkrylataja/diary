@@ -1,6 +1,9 @@
 // Модель даних (SPEC §5).
 
-export type Db = { version: 1; panels: Panel[]; analytes: Analyte[] };
+/** Версія схеми даних усередині data.enc. 1 — без nameOriginal; читається й досі. */
+export const SCHEMA_VERSION = 2;
+
+export type Db = { version: typeof SCHEMA_VERSION; panels: Panel[]; analytes: Analyte[] };
 
 /** Один «пакет» аналізів за дату. */
 export type Panel = {
@@ -15,6 +18,8 @@ export type Panel = {
 
 export type Result = {
   analyteId: string;
+  /** Як показник підписаний у бланку (MCV, HGB, АТ-ТПО); основна назва — Analyte.name. */
+  nameOriginal?: string;
   value?: number;
   valueText?: string; // якщо не число: «<0.5», «негативний»
   unit?: string;
@@ -36,5 +41,5 @@ export type Analyte = {
 export type UnitConversion = { unit: string; factor: number };
 
 export function emptyDb(): Db {
-  return { version: 1, panels: [], analytes: [] };
+  return { version: SCHEMA_VERSION, panels: [], analytes: [] };
 }

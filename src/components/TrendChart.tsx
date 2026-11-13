@@ -22,6 +22,8 @@ export type ChartPoint = {
   status: Status;
   /** Значення з бланка, якщо точку перераховано з інших одиниць (напр. «656,4 mIU/L»). */
   original?: string;
+  /** Як показник підписаний у бланку, якщо відрізняється від основної назви. */
+  nameOriginal?: string;
 };
 
 type Props = { name: string; unit: string | undefined; points: ChartPoint[] };
@@ -282,6 +284,7 @@ function Tooltip({
     formatDateLong(point.date),
     `${formatNumber(point.value)}${unit ? ` ${unit}` : ''}`,
     ...(point.original ? [`у бланку: ${point.original}`] : []),
+    ...(point.nameOriginal ? [`як в аналізі: ${point.nameOriginal}`] : []),
   ];
   const boxWidth = Math.max(...lines.map((l) => l.length)) * 7 + 20;
   const boxHeight = lines.length * 17 + 12;

@@ -84,7 +84,8 @@ describe('збереження чернетки', () => {
       lab: 'Альфа',
       results: [
         { analyteId: 'prolactin', value: 15.4, unit: 'ng/mL', refLow: 4.79, refHigh: 23.3 },
-        { analyteId: 'crp', valueText: '<0.5', unit: 'mg/L', refHigh: 5 },
+        // Назва з бланка підставляється з останнього запису CRP.
+        { analyteId: 'crp', nameOriginal: 'CRP', valueText: '<0.5', unit: 'mg/L', refHigh: 5 },
       ],
     });
     expect(next.panels).toHaveLength(db.panels.length + 1);

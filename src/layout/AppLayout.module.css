@@ -2,3 +2,14 @@
   min-height: 100dvh;
   padding-bottom: calc(var(--nav-height) + var(--space-8) + env(safe-area-inset-bottom));
 }
+
+.banner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--screen-padding);
+}
+
+/* Відступ зверху лише тоді, коли плашка справді показана. */
+.banner:not(:empty) {
+  padding-top: max(var(--space-4), env(safe-area-inset-top));
+}

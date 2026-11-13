@@ -1,4 +1,4 @@
-import { analyteKey, analyteMatches } from './analytes';
+import { analyteKey, analyteMatches, originalName } from './analytes';
 import type { Analyte, Db, Panel, Result } from './types';
 
 export function analyteMap(analytes: Analyte[]): Map<string, Analyte> {
@@ -28,6 +28,7 @@ export function panelMatches(panel: Panel, query: string, analytes: Map<string, 
   if (!q) return true;
   if (panel.lab && analyteKey(panel.lab).includes(q)) return true;
   return panel.results.some((r) => {
+    if (r.nameOriginal && analyteKey(r.nameOriginal).includes(q)) return true;
     const a = analytes.get(r.analyteId);
     return a !== undefined && analyteMatches(a, query);
   });
@@ -118,4 +119,17 @@ export function periodStart(period: Period, today: string): string | undefined {
   if (period === 'all') return undefined;
   const years = period === '1y' ? 1 : 3;
   return `${Number(today.slice(0, 4)) - years}${today.slice(4)}`;
+}
+
+/** Різні назви з бланків для показника (лише ті, що відрізняються від основної). */
+export function originalNamesOf(db: Db, analyte: Analyte): string[] {
+  const seen = new Map<string, string>();
+  for (const p of db.panels) {
+    for (const r of p.results) {
+      if (r.analyteId !== analyte.id) continue;
+      const name = originalName(r, analyte);
+      if (name && !seen.has(analyteKey(name))) seen.set(analyteKey(name), name);
+    }
+  }
+  return [...seen.values()];
 }

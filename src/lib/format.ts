@@ -111,3 +111,9 @@ export function todayIso(now: Date = new Date()): string {
   const d = String(now.getDate()).padStart(2, '0');
   return `${now.getFullYear()}-${m}-${d}`;
 }
+
+/** «13 листопада 2026, 12:57». */
+export function formatDateTime(d: Date): string {
+  const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return `${formatDateLong(d)}, ${time}`;
+}

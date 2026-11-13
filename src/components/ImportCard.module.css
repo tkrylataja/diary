@@ -129,12 +129,26 @@
   font-weight: var(--font-weight-label);
 }
 
-.summary {
-  font-weight: var(--font-weight-label);
-}
-
 .actions {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-4);
+  list-style: none;
+  border-radius: var(--radius-control);
+  background: var(--color-lavender);
+  font-weight: var(--font-weight-medium);
+}
+
+.cellSub {
+  display: block;
+  font-size: var(--font-size-tiny);
+  color: var(--color-text-muted);
 }

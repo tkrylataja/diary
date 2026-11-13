@@ -91,9 +91,11 @@ export function ImportCard() {
         Імпорт з CSV або Excel
       </h2>
       <p className={styles.muted}>
-        Перший рядок — заголовок із колонками{' '}
-        <code>date, lab, analyte, value, unit, ref_low, ref_high</code>. Обов’язкові: date, analyte,
-        value. Рядки з однаковими датою й лабораторією стануть одним записом.
+        CSV (UTF-8, роздільник кома або крапка з комою) або Excel .xlsx (перший аркуш). Перший рядок
+        — заголовок із колонками{' '}
+        <code>date, lab, analyte, analyte_original, value, unit, ref_low, ref_high</code>.
+        Обов’язкові: date, analyte, value. Рядки з однаковими датою й лабораторією стануть одним
+        обстеженням; без лабораторії — групуються за датою.
       </p>
 
       <FileButton
@@ -113,8 +115,8 @@ export function ImportCard() {
         <p className={styles.success} role="status">
           <CircleCheck aria-hidden size={20} strokeWidth={1.8} />
           <span>
-            Імпортовано: нових записів {done.newPanels}, доповнено {done.updatedPanels}, результатів{' '}
-            {done.results}
+            Імпортовано: нових рядків {done.results}, нових обстежень {done.newPanels}, доповнено{' '}
+            {done.updatedPanels}
             {done.duplicates > 0 && `, пропущено дублів ${done.duplicates}`}. Не забудьте зберегти
             файл data.enc.
           </span>
@@ -204,7 +206,14 @@ export function ImportCard() {
                       {parsed.rows.slice(0, PREVIEW_ROWS).map((r) => (
                         <tr key={r.line}>
                           <td>{formatDateLong(r.date)}</td>
-                          <td>{r.analyte}</td>
+                          <td>
+                            {r.analyte}
+                            {r.analyteOriginal && (
+                              <span className={styles.cellSub}>
+                                як в аналізі: {r.analyteOriginal}
+                              </span>
+                            )}
+                          </td>
                           <td>
                             {formatValue(r)} {r.unit}
                           </td>
@@ -220,12 +229,26 @@ export function ImportCard() {
               )}
 
               {preview && (
-                <p className={styles.summary}>
-                  Буде додано: нових записів {preview.newPanels}, доповнено наявних{' '}
-                  {preview.updatedPanels}, результатів {preview.results}, нових показників{' '}
-                  {preview.newAnalytes}
-                  {preview.duplicates > 0 && `. Пропущено дублів: ${preview.duplicates}`}.
-                </p>
+                <ul className={styles.summary}>
+                  <li>
+                    Нових рядків: <strong>{preview.results}</strong>
+                  </li>
+                  <li>
+                    Дублів (буде пропущено): <strong>{preview.duplicates}</strong>
+                  </li>
+                  <li>
+                    Нових показників: <strong>{preview.newAnalytes}</strong>
+                  </li>
+                  {parsed.issues.length > 0 && (
+                    <li>
+                      Рядків з помилками (не імпортуються): <strong>{parsed.issues.length}</strong>
+                    </li>
+                  )}
+                  <li>
+                    Обстежень: нових <strong>{preview.newPanels}</strong>, доповнених{' '}
+                    <strong>{preview.updatedPanels}</strong>
+                  </li>
+                </ul>
               )}
 
               <div className={styles.actions}>

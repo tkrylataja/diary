@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router';
+import { UnsavedBanner } from '../components/UnsavedBanner';
 import { BottomNav } from './BottomNav';
 import styles from './AppLayout.module.css';
 
@@ -25,6 +26,9 @@ export function AppLayout() {
 
   return (
     <div className={styles.shell}>
+      <div className={styles.banner}>
+        <UnsavedBanner />
+      </div>
       <Outlet />
       <BottomNav />
     </div>

@@ -159,3 +159,29 @@ export function knownGroups(db: Db): string[] {
   const groups = new Set(db.analytes.map((a) => a.group?.trim()).filter((g): g is string => !!g));
   return [...groups].sort((a, b) => a.localeCompare(b, 'uk'));
 }
+
+/**
+ * Додає назви з бланків (Result.nameOriginal) у синоніми їхніх показників, щоб пошук
+ * знаходив і за ними. Назву, що вже належить іншому показнику, не чіпаємо.
+ */
+export function syncOriginalSynonyms(db: Db): Db {
+  const extra = new Map<string, string[]>();
+  for (const panel of db.panels) {
+    for (const r of panel.results) {
+      const name = r.nameOriginal?.trim();
+      if (name) extra.set(r.analyteId, [...(extra.get(r.analyteId) ?? []), name]);
+    }
+  }
+  if (extra.size === 0) return db;
+  let changed = false;
+  const analytes = db.analytes.map((a) => {
+    const names = (extra.get(a.id) ?? []).filter(
+      (n) => !findNameConflict(db.analytes, { id: a.id, name: n, synonyms: [] }),
+    );
+    const synonyms = cleanSynonyms(a.name, [...a.synonyms, ...names]);
+    if (synonyms.length === a.synonyms.length) return a;
+    changed = true;
+    return { ...a, synonyms };
+  });
+  return changed ? { ...db, analytes } : db;
+}

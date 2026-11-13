@@ -162,3 +162,84 @@ describe('імпорт у базу', () => {
     expect(twice.db.panels).toHaveLength(once.panels.length);
   });
 });
+
+describe('імпорт: нові вимоги', () => {
+  const header = ['date', 'lab', 'analyte', 'value', 'unit', 'ref_low', 'ref_high'];
+
+  it('CSV з крапкою з комою, десятковою комою й analyte_original', () => {
+    const csv =
+      '\uFEFFdate;lab;analyte;analyte_original;value;unit;ref_low;ref_high\n' +
+      '04.03.2026;Synevo;Середній об’єм еритроцита;MCV;88,5;fL;80;100\n' +
+      '04.03.2026;Synevo;Гемоглобін;HGB;13,2;g/dL;12;15,5\n';
+    const { rows, issues } = parseTable(parseCsv(csv));
+    expect(issues).toEqual([]);
+    expect(rows[0]).toMatchObject({
+      analyte: 'Середній об’єм еритроцита',
+      analyteOriginal: 'MCV',
+      value: 88.5,
+    });
+
+    const { db: next, stats } = applyImport(db, rows, {});
+    expect(stats).toMatchObject({ newPanels: 1, results: 2, newAnalytes: 1, duplicates: 0 });
+    const panel = next.panels.find((p) => p.date === '2026-03-04')!;
+    expect(panel.results.map((r) => r.nameOriginal)).toEqual(['MCV', 'HGB']);
+    expect(panel.results[1]?.analyteId).toBe('hemoglobin');
+    // Назва з бланка стає синонімом нового показника — пошук знайде «MCV».
+    expect(next.analytes.find((a) => a.name === 'Середній об’єм еритроцита')?.synonyms).toEqual([
+      'MCV',
+    ]);
+  });
+
+  it('знаходить наявний показник за analyte_original, якщо основна назва незнайома', () => {
+    const { rows } = parseTable([
+      ['date', 'analyte', 'analyte_original', 'value'],
+      ['2026-03-04', 'Пролактин сироватки', 'PRL', '12'],
+    ]);
+    expect(unknownAnalyteNames(db.analytes, rows)).toEqual([]);
+    const { db: next } = applyImport(db, rows, {});
+    expect(next.panels.find((p) => p.date === '2026-03-04')?.results[0]?.analyteId).toBe(
+      'prolactin',
+    );
+  });
+
+  it('текстові значення зберігаються як valueText і не мають статусу', async () => {
+    const { resultStatus } = await import('./status');
+    const { rows } = parseTable([
+      ['date', 'analyte', 'value', 'unit', 'ref_high'],
+      ['2026-03-04', 'Білок у сечі', 'негативний', '', ''],
+      ['2026-03-04', 'CRP', '<10.0', 'mg/L', '5'],
+      ['2026-03-04', 'Кетони', 'сліди', '', ''],
+    ]);
+    expect(rows.map((r) => [r.value, r.valueText])).toEqual([
+      [undefined, 'негативний'],
+      [undefined, '<10.0'],
+      [undefined, 'сліди'],
+    ]);
+    const { db: next } = applyImport(db, rows, {});
+    const results = next.panels.find((p) => p.date === '2026-03-04')!.results;
+    expect(results.map(resultStatus)).toEqual(['unknown', 'unknown', 'unknown']);
+  });
+
+  it('дубль: та сама дата, показник, значення й одиниця — навіть в іншій лабораторії', () => {
+    const { rows } = parseTable([
+      header,
+      ['2024-03-04', 'Інша лабораторія', 'PRL', '26,9', 'NG/ML', '', ''],
+      ['2024-03-04', 'Інша лабораторія', 'PRL', '26,9', 'mIU/L', '', ''],
+    ]);
+    const { stats } = applyImport(db, rows, {});
+    expect(stats).toMatchObject({ duplicates: 1, results: 1 });
+  });
+
+  it('рядки без лабораторії групуються за датою', () => {
+    const { rows } = parseTable([
+      header,
+      ['2026-05-01', '', 'TSH', '2', '', '', ''],
+      ['2026-05-01', '', 'FT4', '15', '', '', ''],
+    ]);
+    const { db: next, stats } = applyImport(db, rows, {});
+    expect(stats.newPanels).toBe(1);
+    const panel = next.panels.find((p) => p.date === '2026-05-01')!;
+    expect(panel.lab).toBeUndefined();
+    expect(panel.results).toHaveLength(2);
+  });
+});

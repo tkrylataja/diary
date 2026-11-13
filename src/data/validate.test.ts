@@ -19,7 +19,7 @@ const valid = {
 
 describe('parseDb', () => {
   it('приймає коректні дані', () => {
-    expect(parseDb(valid)).toEqual(valid);
+    expect(parseDb(valid)).toEqual({ ...valid, version: 2 });
   });
 
   it('відкидає зайві поля', () => {
@@ -35,7 +35,7 @@ describe('parseDb', () => {
 
   const broken: [string, unknown][] = [
     ['не об’єкт', 'text'],
-    ['інша версія', { ...valid, version: 2 }],
+    ['невідома версія', { ...valid, version: 3 }],
     ['немає panels', { version: 1, analytes: [] }],
     ['погана дата', { ...valid, panels: [{ ...valid.panels[0], date: '2024-02-30' }] }],
     [
@@ -92,4 +92,30 @@ describe('коефіцієнти одиниць', () => {
       expect(() => parseDb(withConv([c]))).toThrow(DbFormatError);
     },
   );
+});
+
+describe('версії схеми', () => {
+  it('старий формат (version 1, без nameOriginal) читається й стає версією 2', () => {
+    const db = parseDb(valid);
+    expect(db.version).toBe(2);
+    expect(db.panels[0]?.results[0]).not.toHaveProperty('nameOriginal');
+  });
+
+  it('nameOriginal зберігається, порожній відкидається', () => {
+    const db = parseDb({
+      ...valid,
+      version: 2,
+      panels: [
+        {
+          ...valid.panels[0],
+          results: [
+            { analyteId: 'prl', value: 1, nameOriginal: ' PRL ' },
+            { analyteId: 'prl', value: 2, nameOriginal: '  ' },
+          ],
+        },
+      ],
+    });
+    expect(db.panels[0]?.results[0]?.nameOriginal).toBe('PRL');
+    expect(db.panels[0]?.results[1]).not.toHaveProperty('nameOriginal');
+  });
 });

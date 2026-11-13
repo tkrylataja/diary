@@ -105,3 +105,15 @@ describe('динаміка', () => {
     expect(periodStart('all', '2026-11-13')).toBeUndefined();
   });
 });
+
+describe('пошук за назвою з бланка', () => {
+  it('знаходить запис за nameOriginal, навіть якщо його немає в синонімах', () => {
+    const panel = {
+      id: 'p',
+      date: '2026-01-01',
+      results: [{ analyteId: 'hemoglobin', value: 13, nameOriginal: 'Hemoglobina całkowita' }],
+    };
+    expect(panelMatches(panel, 'całkowita', analytes)).toBe(true);
+    expect(panelMatches(panel, 'глюкоза', analytes)).toBe(false);
+  });
+});

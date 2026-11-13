@@ -1,6 +1,7 @@
 import { ChartSpline, Info, Plus, SearchX, TriangleAlert } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
+import { analyteKey, originalName } from '../data/analytes';
 import { AnalytePicker } from '../components/AnalytePicker';
 import { ButtonLink } from '../components/Button';
 import { EmptyState } from '../components/EmptyState';
@@ -9,7 +10,14 @@ import { PrintHeader } from '../components/PrintHeader';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { StatusValue } from '../components/StatusValue';
 import { TrendChart, type ChartPoint } from '../components/TrendChart';
-import { PERIODS, analyteSeries, parsePeriod, periodStart, unitSummary } from '../data/selectors';
+import {
+  PERIODS,
+  analyteSeries,
+  originalNamesOf,
+  parsePeriod,
+  periodStart,
+  unitSummary,
+} from '../data/selectors';
 import { resultStatus } from '../data/status';
 import type { Analyte } from '../data/types';
 import { availableUnits, normSummary, sameUnit, showIn } from '../data/units';
@@ -24,20 +32,25 @@ export function TrendsScreen() {
   const navigate = useNavigate();
   const analyte = db.analytes.find((a) => a.id === analyteId);
 
+  const originals = analyte ? originalNamesOf(db, analyte) : [];
+  // «Також» — синоніми без тих назв, що вже показані як «як в аналізах».
+  const otherSynonyms = analyte
+    ? analyte.synonyms.filter((s) => !originals.some((o) => analyteKey(o) === analyteKey(s)))
+    : [];
+  const namesLine = [
+    originals.length > 0 ? `Як в аналізах: ${originals.join(' · ')}` : '',
+    otherSynonyms.length > 0 ? `Також: ${otherSynonyms.join(' · ')}` : '',
+  ]
+    .filter(Boolean)
+    .join('. ');
+
   function select(a: Analyte) {
     navigate(`/trends/${encodeURIComponent(a.id)}`, { replace: analyteId !== undefined });
   }
 
   return (
     <Screen>
-      <PrintHeader
-        title={analyte?.name}
-        details={
-          analyte && analyte.synonyms.length > 0
-            ? `Також: ${analyte.synonyms.join(' · ')}`
-            : undefined
-        }
-      />
+      <PrintHeader title={analyte?.name} details={namesLine || undefined} />
       <ScreenHeader
         title="Динаміка"
         pageTitle={analyte ? `Динаміка: ${analyte.name}` : undefined}
@@ -60,9 +73,7 @@ export function TrendsScreen() {
               value={analyte}
               onChange={select}
             />
-            {analyte && analyte.synonyms.length > 0 && (
-              <p className={styles.synonyms}>Також: {analyte.synonyms.join(' · ')}</p>
-            )}
+            {analyte && namesLine && <p className={styles.synonyms}>{namesLine}</p>}
           </div>
 
           {analyte ? (
@@ -122,6 +133,7 @@ function AnalyteTrend({ analyte }: { analyte: Analyte }) {
       refHigh: s.refHigh,
       status: resultStatus(result),
       original: s.original ? `${s.original.value} ${s.original.unit ?? ''}`.trim() : undefined,
+      nameOriginal: originalName(result, analyte),
     }));
 
   if (series.length === 0) {
@@ -272,6 +284,11 @@ function AnalyteTrend({ analyte }: { analyte: Analyte }) {
                     <span className={styles.rowSub}>
                       {ref && <span>реф. {ref}</span>}
                       {panel.note && <span className={styles.note}>{panel.note}</span>}
+                    </span>
+                  )}
+                  {originalName(result, analyte) && (
+                    <span className={styles.original}>
+                      як в аналізі: {originalName(result, analyte)}
                     </span>
                   )}
                   {s.original && (
